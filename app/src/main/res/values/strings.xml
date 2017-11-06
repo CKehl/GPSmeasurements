@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GPS Measurements</string>
+    <string name="version">0</string>
+    <string name="release">1</string>
+    <string name="revision">1</string>
+    <string name="license"></string>
+</resources>
