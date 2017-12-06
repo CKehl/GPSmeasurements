@@ -4,4 +4,5 @@
     <string name="release">1</string>
     <string name="revision">1</string>
     <string name="license"></string>
+    <string name="btn_start_stop">Start/Stop</string>
 </resources>
