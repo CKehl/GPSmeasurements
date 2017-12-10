@@ -56,6 +56,14 @@ public class MainGPSactivity extends AppCompatActivity implements LocationDataTo
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        if(_localisationFragment!=null) {
+            getFragmentManager().beginTransaction().remove(_localisationFragment).commit();
+            _localisationFragment=null;
+        }
+        super.onDestroy();
+    }
 
     @Override
     public void isReceiving(boolean indicator) {
