@@ -80,6 +80,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/btn_start_stop"
                 android:id="@+id/btn_start_stop" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_about"
+                android:id="@+id/btn_about" />
         </LinearLayout>
 
     </LinearLayout>

@@ -62,6 +62,7 @@ public class IntentBasedGeoUtils {
     static void sendNotification(Context context, String notificationDetails) {
         // Create an explicit content Intent that starts the main Activity.
         Intent notificationIntent = new Intent(context, IntentBasedGeoUtils.class);
+        //Intent notificationIntent = new Intent(context, IntentBasedGeoNotifyView.class);
 
         notificationIntent.putExtra("from_notification", true);
 

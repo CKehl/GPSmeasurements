@@ -15,6 +15,7 @@ import android.widget.TextView;
  */
 public class AboutDialog extends DialogFragment {
     TextView mVersionText = null;
+    TextView mAuthorText = null;
     Button mExitButton = null;
 
     @Override
@@ -32,6 +33,9 @@ public class AboutDialog extends DialogFragment {
         mVersionText = (TextView) (getDialog().findViewById(R.id.aboutDlg_version_txt));
         String versionText = getString(R.string.version)+"."+getString(R.string.release)+":r"+getString(R.string.revision);
         mVersionText.setText("Version: "+versionText);
+        mAuthorText = (TextView)getDialog().findViewById(R.id.aboutDlg_author_txt);
+        String authorText = "Christian Kehl";
+        mAuthorText.setText("Author: "+authorText);
         mExitButton = (Button) (getDialog().findViewById(R.id.about_btn_exit));
         mExitButton.setOnClickListener(new Button.OnClickListener() {
             @Override

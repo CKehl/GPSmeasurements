@@ -1,57 +1,33 @@
 package de.ckehl.gpsmeasurements;
 
-import android.Manifest;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.tasks.OnSuccessListener;
-
-import java.io.File;
-
 
 /**
  * Created by christian on 2-2-15.
  */
 public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,LocationListener {
-    //final private String geoid_model = "WW15MGH.DAC";
-    //final private String geoid_weburl = "http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm96/binary/WW15MGH.DAC";
-
-    public static final int GPS_REQUEST_PERMISSION_CODE = 900;
-
     private Context mContext;
-    private Activity mActivity;
-    private View mHeadView;
     private boolean isGPSEnabled = false;
     private boolean isNetworkEnabled = false;
     private boolean canGetLocation = false;
@@ -91,21 +67,9 @@ public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCa
         getLocation();
     }
 
-    /*
-    public GeoReceiver(Context context, LocationInterface location_interface)
+    public GeoReceiver(Context context, LocationInterface gpsInterface)
     {
-        mRunning = false;
-        canGetLocation = false;
         mContext = context;
-        mLocationInterface = location_interface;
-        //getLocation();
-    }
-    */
-
-    public GeoReceiver(Activity headActivity, LocationInterface gpsInterface) {
-        mActivity = headActivity;
-        mContext = headActivity.getBaseContext();
-        mHeadView = mActivity.findViewById(R.id.main_view_container);
         canGetLocation = false;
         mRunning = false;
         mLocationInterface = gpsInterface;
@@ -114,65 +78,17 @@ public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCa
         mLocationManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
     }
 
-    public void requestLocationPermission() {
+    /*
+    public GeoReceiver(Activity headActivity, LocationInterface gpsInterface) {
+        mContext = headActivity.getBaseContext();
+        canGetLocation = false;
+        mRunning = false;
+        mLocationInterface = gpsInterface;
+        mGoogleApiClient = new GoogleApiClient.Builder(mContext).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
+        createLocationRequest();
         mLocationManager = (LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
-        // getting GPS status
-        isGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-        // getting network status
-        isNetworkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-        if ((isGPSEnabled==false) && (isNetworkEnabled==false)) {
-            showSettingsAlert();
-            //Intent permissionsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            //startActivity(permissionsIntent);
-        }
-
-        // getting GPS status
-        isGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        // getting network status
-        isNetworkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (!isGPSEnabled && !isNetworkEnabled) {
-            return;
-        }
-
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            hasGPSpermissions = ((ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED));
-            if (!hasGPSpermissions) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    Snackbar.make(mHeadView, "Request GPS access", Snackbar.LENGTH_INDEFINITE).setAction("Granted", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, GPS_REQUEST_PERMISSION_CODE);
-                        }
-                    }).show();
-                } else {
-                    ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, GPS_REQUEST_PERMISSION_CODE);
-                }
-            }
-        }
-
     }
-
-    public void handleGPSpermissionRequest(int requestCode, String permissions[], int[] grantResults) {
-        switch(requestCode) {
-            case GPS_REQUEST_PERMISSION_CODE: {
-                // If request is cancelled, the result arrays are empty
-                if((grantResults.length >0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    //permission granted
-                    Toast.makeText(mContext, "Permission was granted!", Toast.LENGTH_LONG).show();
-                    hasGPSpermissions = true;
-                    //try { LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this); }
-                    //catch (SecurityException e) { e.printStackTrace(); }
-                } else {
-                    //permission denied
-                    hasGPSpermissions = false;
-                }
-                return;
-            }
-        }
-    }
+    */
 
     public synchronized void startUsingGPS()
     {
@@ -233,20 +149,24 @@ public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCa
                 this.canGetLocation = true;
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
-                    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,MIN_TIME_BW_UPDATES,MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network");
-                    if (mLocationManager != null) {
-                        mlocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (mlocation != null) {
-                            latitude = mlocation.getLatitude();
-                            longitude = mlocation.getLongitude();
-                            altitude = mlocation.getAltitude();
+                    try {
+                        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                        Log.d("Network", "Network");
+                        if (mLocationManager != null) {
+                            mlocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                            if (mlocation != null) {
+                                latitude = mlocation.getLatitude();
+                                longitude = mlocation.getLongitude();
+                                altitude = mlocation.getAltitude();
+                            }
                         }
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
                     }
                 }
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
-                    //if (mlocation == null) {
+                    try {
                         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,MIN_TIME_BW_UPDATES,MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                         Log.d("GPS Enabled", "GPS Enabled");
                         if (mLocationManager != null) {
@@ -257,7 +177,9 @@ public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCa
                                 altitude = mlocation.getAltitude();
                             }
                         }
-                    //}
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             mRunning = true;
@@ -412,41 +334,6 @@ public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCa
     }
 
     /**
-     * Function to show settings alert dialog
-     * */
-    public void showSettingsAlert(){
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
-
-        // Setting Dialog Title
-        alertDialogBuilder.setTitle("GPS is settings");
-        alertDialogBuilder.setCancelable(false);
-        // Setting Dialog Message
-        alertDialogBuilder.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
-        // Setting Icon to Dialog
-        //alertDialog.setIcon(R.drawable.delete);
-
-        // On pressing Settings button
-        alertDialogBuilder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                mActivity.startActivity(intent);
-            }
-        });
-
-        // on pressing cancel button
-        alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // Showing Alert Message
-        alertDialog.show();
-    }
-
-    /**
      * Stop using GPS listener
      * Calling this function will stop using GPS in your app
      * */
@@ -501,24 +388,22 @@ public class GeoReceiver extends Service implements GoogleApiClient.ConnectionCa
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
-        if ((ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            Log.e("GeoReceiver", "no permissions to request position");
-            return;
+        try {
+            mRunning = true;
+            canGetLocation = false;
+            mlocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mlocation != null) {
+                Log.i("GeoReceiver", "last location received.");
+                latitude = mlocation.getLatitude();
+                longitude = mlocation.getLongitude();
+                altitude = mlocation.getAltitude();
+                canGetLocation = true;
+            }
+            setLocationManagerRequest();
+            Log.i("GeoReceiver", "Location request is set up.");
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
-
-        mRunning = true;
-        canGetLocation = false;
-        mlocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if(mlocation!=null) {
-            Log.i("GeoReceiver", "last location received.");
-            latitude = mlocation.getLatitude();
-            longitude = mlocation.getLongitude();
-            altitude = mlocation.getAltitude();
-            canGetLocation = true;
-        }
-        setLocationManagerRequest();
-        Log.i("GeoReceiver", "Location request is set up.");
     }
 
     @Override
